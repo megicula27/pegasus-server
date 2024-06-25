@@ -7,9 +7,16 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 // Enable CORS for all routes
+const allowedOrigins = [
+  "https://pegasus-weld.vercel.app",
+  "http://localhost:3000",
+];
 app.use(
   cors({
     origin: "https://pegasus-weld.vercel.app",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    allowedOrigins: allowedOrigins,
   })
 );
 
@@ -28,7 +35,7 @@ wss.on("connection", (ws) => {
 
   ws.on("message", (message) => {
     const data = JSON.parse(message);
-
+    console.log("Received message:", data);
     if (data.type === "register") {
       userId = data.userID;
       clients.set(userId, ws);
@@ -62,8 +69,12 @@ wss.on("connection", (ws) => {
         console.log("Recipient not found or not connected:", data.to);
       }
     } else if (data.type === "response") {
+      console.log("Processing response:", data); // Add this log
+
       const recipientWs = clients.get(data.to);
       if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
+        console.log("Sending response to recipient:", data.to); // Add this log
+
         recipientWs.send(JSON.stringify(data));
 
         // Remove pending invitation
