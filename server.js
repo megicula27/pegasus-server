@@ -1,29 +1,13 @@
-const express = require("express");
-const http = require("http");
 const WebSocket = require("ws");
-const cors = require("cors");
+const http = require("http");
 
-const app = express();
 const port = process.env.PORT || 8080;
 
-// Enable CORS for all routes
-const allowedOrigins = [
-  "https://pegasus-weld.vercel.app",
-  "http://localhost:3000",
-];
-app.use(
-  cors({
-    origin: "https://pegasus-weld.vercel.app",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-    allowedOrigins: allowedOrigins,
-  })
-);
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("WebSocket server is running");
+});
 
-// Create an HTTP server using Express
-const server = http.createServer(app);
-
-// Create a WebSocket server attached to the HTTP server
 const wss = new WebSocket.Server({ server });
 
 const clients = new Map();
@@ -35,7 +19,7 @@ wss.on("connection", (ws) => {
 
   ws.on("message", (message) => {
     const data = JSON.parse(message);
-    console.log("Received message:", data);
+
     if (data.type === "register") {
       userId = data.userID;
       clients.set(userId, ws);
@@ -69,12 +53,8 @@ wss.on("connection", (ws) => {
         console.log("Recipient not found or not connected:", data.to);
       }
     } else if (data.type === "response") {
-      console.log("Processing response:", data); // Add this log
-
       const recipientWs = clients.get(data.to);
       if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
-        console.log("Sending response to recipient:", data.to); // Add this log
-
         recipientWs.send(JSON.stringify(data));
 
         // Remove pending invitation
@@ -102,12 +82,6 @@ wss.on("connection", (ws) => {
   });
 });
 
-// Add a simple route for health checks
-app.get("/ping", (req, res) => {
-  res.send("pong");
-});
-
-// Start the server
 server.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`WebSocket server running on port ${port}`);
 });
