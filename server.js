@@ -7,7 +7,11 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 // Enable CORS for all routes
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://pegasus-weld.vercel.app",
+  })
+);
 
 // Create an HTTP server using Express
 const server = http.createServer(app);
