@@ -9,7 +9,7 @@ const port = process.env.PORT || 8080;
 // Enable CORS for all routes
 app.use(
   cors({
-    origin: "https://pegasus-git-dev-aditya-megicula27s-projects.vercel.app/",
+    origin: "https://pegasus-weld.vercel.app",
   })
 );
 
